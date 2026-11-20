@@ -1,4 +1,4 @@
-import { ACCOUNTS, KNOWLEDGE, MODE_LABELS, DemoConversationAdapter, visibleOrders } from './domain.js';
+import { ACCOUNTS, KNOWLEDGE, MODE_LABELS, DemoConversationAdapter, visibleOrders } from './domain.js?v=0.2.0';
 
 const $ = id => document.getElementById(id);
 const adapter = new DemoConversationAdapter();
