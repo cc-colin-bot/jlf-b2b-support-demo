@@ -8,6 +8,14 @@
 v0.2：默认收起；修复订单上下文、快捷话术与草稿丢失；增加历史阅读时的新消息提示、
 人工态发单、演示超时/无人值守与留言、查询时间和依据查看。
 
+v0.3：首屏只保留一个输入主操作、两个轻量快捷项。人工服务放在右上角，
+演示控制收进“更多”。开始聊天后欢迎区退出，聊天记录成为主体。
+
+设计参考（仅借鉴模式，独立实现，没有直接复制组件代码）：
+- [assistant-ui](https://github.com/assistant-ui/assistant-ui)：输入区及轻量建议项。
+- [Vercel Chatbot](https://github.com/vercel/chatbot)：简短欢迎语及信息层级。
+- [Chatwoot](https://github.com/chatwoot/chatwoot)：紧凑客服头部和操作区域。
+
 `embed-example.html` 提供独立 iframe 嵌入与挂载/销毁示例。
 它只负责界面隔离，不提供真实身份、业务权限或客服服务。
 

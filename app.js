@@ -1,4 +1,4 @@
-import { ACCOUNTS, KNOWLEDGE, MODE_LABELS, DemoConversationAdapter, visibleOrders } from './domain.js?v=0.2.0';
+import { ACCOUNTS, KNOWLEDGE, MODE_LABELS, DemoConversationAdapter, visibleOrders } from './domain.js?v=0.3.0';
 
 const $ = id => document.getElementById(id);
 const adapter = new DemoConversationAdapter();
@@ -37,6 +37,7 @@ function showChat(open = true) {
   if (open) {
     unread = 0; $('unreadBadge').hidden = true;
     if (!wasOpen && state.messages.length === 1 && state.mode === 'ai') requestAnimationFrame(() => $('messages').scrollTop = 0);
+    if (!wasOpen && matchMedia('(hover: hover)').matches) requestAnimationFrame(() => $('messageInput').focus({ preventScroll: true }));
   }
   else $('chatLauncher').focus();
   notifyParent();
@@ -83,19 +84,7 @@ function renderDashboard() {
 
 function renderWelcome() {
   const welcome = el('section', 'welcome');
-  const avatar = el('div', 'welcome-avatar'); avatar.append(icon('headset'));
-  welcome.append(avatar, el('h3', '', '您好，有什么可以帮您？'), el('p', '', '查订单进度、了解平台流程，\n也可以随时联系人工商务。'));
-  const options = el('div', 'welcome-options');
-  for (const [name, title, description, question] of [
-    ['box', '查询我的订单', '查看当前账号的订单与进度', '查询我的最近订单'],
-    ['book', '了解平台操作', '知识库中的流程和操作说明', '如何在平台下单？'],
-    ['user', '联系人工商务', '保留对话，在当前页面继续沟通', null],
-  ]) {
-    const b = button('', 'welcome-option', () => question ? send(question) : requestHuman());
-    const copy = el('span'); copy.append(el('strong', '', title), el('small', '', description));
-    b.append(icon(name), copy, icon('chevron', true)); options.append(b);
-  }
-  welcome.append(options, el('div', 'welcome-privacy', '本原型无需输入手机号或密码。演示账号不代表真实登录，正式接入后由 B2B 服务端校验权限。'));
+  welcome.append(el('h3', '', '需要什么帮助？'), el('p', '', '查订单、问业务流程，直接告诉我。'));
   return welcome;
 }
 function orderResult(order, queriedAt) {
@@ -114,7 +103,12 @@ function orderResult(order, queriedAt) {
 function renderMessage(message) {
   const wrapper = el('article', `message ${message.role}`);
   wrapper.dataset.messageId = message.id;
-  if (message.role === 'system') { wrapper.textContent = message.text; return wrapper; }
+  if (message.role === 'system') {
+    wrapper.textContent = message.text;
+    // The footer and About dialog keep the demo warning visible without a wall of onboarding text.
+    wrapper.hidden = message.text.startsWith('B2B 演示会话已建立');
+    return wrapper;
+  }
   const sender = el('div', 'message-sender');
   if (message.role !== 'customer') sender.append(el('span', 'mini-avatar', message.role === 'staff' ? '人' : '智'));
   sender.append(document.createTextNode(message.role === 'customer' ? state.account.contact : message.role === 'staff' ? message.name : message.role === 'error' ? '模拟服务提示' : 'AI 助手 · 模拟'));
@@ -152,6 +146,8 @@ function renderConversation(next) {
   const nearBottom = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 90;
   const oldScrollTop = messages.scrollTop, reset = previous?.id !== state.id;
   const added = reset ? state.messages : state.messages.slice(previous.messages.length);
+  $('supportPanel').classList.toggle('is-empty', state.messages.length === 1 && state.mode === 'ai');
+  $('supportPanel').classList.toggle('manual-mode', state.mode === 'human' || state.mode === 'waiting');
   $('chatCompany').textContent = state.account.company;
   $('modeLabel').textContent = state.mode === 'human' ? `${state.agent} · 人工接待中` : MODE_LABELS[state.mode];
   $('modeBanner').hidden = state.mode === 'ai';
@@ -161,11 +157,11 @@ function renderConversation(next) {
   $('waitDetail').textContent = state.followupSaved ? '留言已在本页模拟记录，未通知真实商务。' : '当前仅模拟等待，不承诺实际接入时间。';
   $('cancelWaiting').hidden = state.mode !== 'waiting';
   $('handoffButton').disabled = state.mode !== 'ai';
-  $('handoffButton').replaceChildren(icon('user', true), document.createTextNode(state.mode === 'human' ? '人工接待' : state.mode === 'waiting' ? '等待人工' : '转人工'));
+  $('handoffButton').replaceChildren(icon('headset', true), el('span', '', state.mode === 'human' ? '人工接待' : state.mode === 'waiting' ? '等待接入' : '人工服务'));
   $('selectedContext').hidden = !state.selectedOrderId;
   $('selectedContextText').textContent = `当前订单：${state.selectedOrderId || ''}`;
   $('composerHint').textContent = state.mode === 'human' ? '消息将进入模拟人工会话' : state.mode === 'waiting' ? '可补充问题，等待模拟商务接入' : 'Enter 发送 · Shift + Enter 换行';
-  $('messageInput').placeholder = state.mode === 'human' ? '向模拟商务发送消息…' : state.mode === 'waiting' ? '补充您希望人工处理的问题…' : '输入问题，例如：我最近的订单到哪了？';
+  $('messageInput').placeholder = state.mode === 'human' ? '向模拟商务发送消息…' : state.mode === 'waiting' ? '补充您希望人工处理的问题…' : '输入订单号，或直接描述您的问题…';
   $('messageForm').hidden = state.mode === 'closed'; $('closedActions').hidden = state.mode !== 'closed';
   document.querySelectorAll('.chat-actions [data-question]').forEach(b => b.disabled = state.mode === 'closed' || state.busy);
   const manual = state.mode === 'human' || state.mode === 'waiting';
@@ -234,6 +230,7 @@ function requestHuman() {
   toast('已模拟转人工；请在「演示控制」中模拟商务接单。');
 }
 function openDialog(kind) {
+  closeMenu();
   dialogKind = kind;
   $('dialogContent').replaceChildren();
   if (kind === 'controls') renderControls();
@@ -242,6 +239,7 @@ function openDialog(kind) {
   if (!$('demoDialog').open) $('demoDialog').showModal();
 }
 function customDialog(title) {
+  closeMenu();
   dialogKind = 'detail'; $('dialogTitle').textContent = title;
   $('dialogContent').replaceChildren();
   if (!$('demoDialog').open) $('demoDialog').showModal();
@@ -334,6 +332,7 @@ function renderAbout() {
 
 document.addEventListener('click', event => {
   const target = event.target.closest('button,a'); if (!target) return;
+  if (target.id !== 'moreButton' && !target.closest('#supportMenu')) closeMenu();
   if (target.matches('.brand')) { event.preventDefault(); currentView = 'home'; renderDashboard(); return; }
   if (target.dataset.view) {
     currentView = target.dataset.view;
@@ -356,6 +355,12 @@ $('messageInput').addEventListener('keydown', event => {
   if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && !window.matchMedia('(pointer: coarse)').matches) { event.preventDefault(); if (!$('sendButton').disabled) send($('messageInput').value, { fromComposer: true }); }
 });
 $('handoffButton').addEventListener('click', requestHuman);
+function closeMenu() { $('supportMenu').hidden = true; $('moreButton').setAttribute('aria-expanded', 'false'); }
+$('moreButton').addEventListener('click', () => {
+  const open = $('supportMenu').hidden; $('supportMenu').hidden = !open; $('moreButton').setAttribute('aria-expanded', String(open));
+});
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('supportMenu').hidden) { closeMenu(); $('moreButton').focus(); } });
+document.addEventListener('pointerdown', event => { if (!event.target.closest('#supportMenu') && !event.target.closest('#moreButton')) closeMenu(); });
 $('cancelWaiting').addEventListener('click', () => adapter.cancelHandoff());
 $('minimizeChat').addEventListener('click', () => showChat(false));
 $('chatLauncher').addEventListener('click', () => showChat());
