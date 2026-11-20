@@ -1,9 +1,10 @@
-import { ACCOUNTS, KNOWLEDGE, MODE_LABELS, DemoConversationAdapter, visibleOrders } from './domain.js?v=0.3.0';
+import { ACCOUNTS, KNOWLEDGE, HOME_FAQS, publishedFaqs, sampleFaqs, MODE_LABELS, DemoConversationAdapter, visibleOrders } from './domain.js?v=0.4.0';
 
 const $ = id => document.getElementById(id);
 const adapter = new DemoConversationAdapter();
 let state, lastState, isOpen = false, unread = 0, dialogKind = null, currentView = 'home', toastTimer;
 let clientSequence = 0, forceScroll = false, newMessageCount = 0, waitTimer;
+let faqBatch = [], faqCount = 0;
 const params = new URLSearchParams(location.search);
 const embedded = params.get('embed') === '1';
 document.body.classList.toggle('embedded', embedded);
@@ -87,6 +88,31 @@ function renderWelcome() {
   welcome.append(el('h3', '', '需要什么帮助？'), el('p', '', '查订单、问业务流程，直接告诉我。'));
   return welcome;
 }
+function renderHomeFaqs(reset = false) {
+  const isHome = state.messages.length === 1 && state.mode === 'ai';
+  $('homeFaqs').hidden = !isHome;
+  if (!isHome) return;
+  const viewportHeight = window.visualViewport?.height || innerHeight;
+  const availableHeight = innerWidth <= 760 || embedded ? viewportHeight : Math.min(710, viewportHeight - 108);
+  const count = availableHeight < 700 ? 2 : 4;
+  const entries = publishedFaqs(HOME_FAQS);
+  if (reset || !faqBatch.length || count !== faqCount) {
+    faqBatch = sampleFaqs(entries, count, reset ? [] : faqBatch.map(e => e.id)); faqCount = count;
+    $('faqList').replaceChildren();
+    for (const faq of faqBatch) {
+      const row = button(faq.question, 'faq-item', () => chooseFaq(faq.id)); row.dataset.faqId = faq.id;
+      $('faqList').append(row);
+    }
+  }
+  $('refreshFaqs').hidden = entries.length <= count;
+  $('homeFaqs').hidden = !entries.length;
+}
+function chooseFaq(id) {
+  if (state.mode !== 'ai' || state.busy) { toast('请先结束当前处理，再选择常见问题。'); return; }
+  forceScroll = true;
+  try { adapter.answerFaq(id, `faq-click-${++clientSequence}`); }
+  catch { forceScroll = false; toast('这条问题暂不可用，请重新选择或联系人工。'); }
+}
 function orderResult(order, queriedAt) {
   const card = el('section', 'order-result'), head = el('div', 'order-result-head');
   card.setAttribute('aria-label', `${order.id} 演示订单进度`);
@@ -111,7 +137,7 @@ function renderMessage(message) {
   }
   const sender = el('div', 'message-sender');
   if (message.role !== 'customer') sender.append(el('span', 'mini-avatar', message.role === 'staff' ? '人' : '智'));
-  sender.append(document.createTextNode(message.role === 'customer' ? state.account.contact : message.role === 'staff' ? message.name : message.role === 'error' ? '模拟服务提示' : 'AI 助手 · 模拟'));
+  sender.append(document.createTextNode(message.role === 'customer' ? state.account.contact : message.role === 'staff' ? message.name : message.role === 'error' ? '模拟服务提示' : message.answer?.origin === 'faq' ? '标准答复 · 演示' : 'AI 助手 · 模拟'));
   const time = el('time', '', new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit' }).format(message.time));
   time.dateTime = new Date(message.time).toISOString(); sender.append(time);
   const bubble = el('div', 'bubble', message.text);
@@ -199,6 +225,7 @@ function renderConversation(next) {
   }
   if (state.mode !== 'waiting') clearTimeout(waitTimer);
   if (dialogKind === 'controls' && $('demoDialog').open) renderControls();
+  renderHomeFaqs(reset);
   notifyParent();
   lastState = structuredClone(state);
 }
@@ -355,6 +382,7 @@ $('messageInput').addEventListener('keydown', event => {
   if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && !window.matchMedia('(pointer: coarse)').matches) { event.preventDefault(); if (!$('sendButton').disabled) send($('messageInput').value, { fromComposer: true }); }
 });
 $('handoffButton').addEventListener('click', requestHuman);
+$('refreshFaqs').addEventListener('click', () => { faqCount = 0; renderHomeFaqs(); });
 function closeMenu() { $('supportMenu').hidden = true; $('moreButton').setAttribute('aria-expanded', 'false'); }
 $('moreButton').addEventListener('click', () => {
   const open = $('supportMenu').hidden; $('supportMenu').hidden = !open; $('moreButton').setAttribute('aria-expanded', String(open));
@@ -385,7 +413,7 @@ $('demoDialog').addEventListener('click', event => {
 });
 function updateConnection() { $('connectionBanner').hidden = navigator.onLine; }
 window.addEventListener('online', updateConnection); window.addEventListener('offline', updateConnection);
-function updateViewport() { document.documentElement.style.setProperty('--support-vh', `${window.visualViewport?.height || window.innerHeight}px`); }
+function updateViewport() { document.documentElement.style.setProperty('--support-vh', `${window.visualViewport?.height || window.innerHeight}px`); if (state) renderHomeFaqs(); }
 window.visualViewport?.addEventListener('resize', updateViewport); window.addEventListener('resize', updateViewport);
 window.addEventListener('pagehide', () => { clearTimeout(waitTimer); clearTimeout(toastTimer); });
 adapter.subscribe(renderConversation); adapter.open(); renderDashboard(); showChat(params.get('open') === '1'); updateConnection(); updateViewport();

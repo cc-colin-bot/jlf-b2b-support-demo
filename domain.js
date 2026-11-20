@@ -16,6 +16,37 @@ export const KNOWLEDGE = [
   { id: 'KB-DEMO-03', title: '查询订单需要哪些信息', match: /查询.*(资料|信息)|查单.*需要/, answer: '请提供订单编号，也可以先查询「我的最近订单」，再选择要了解的一笔。本原型只使用 B2B-DEMO 开头的虚构订单，不需要提交真实手机号、身份证或业务单据。' },
 ];
 
+// Demo-only FAQ projection. Production must obtain audience-filtered, published
+// entries from the existing knowledge service, not a second editable answer store.
+export const HOME_FAQS = KNOWLEDGE.map((entry, index) => ({
+  id: entry.id,
+  question: ['如何在平台下单？', '订单状态有什么含义？', '查询订单需要哪些信息？'][index],
+  answer: entry.answer, source: entry.title, kind: 'knowledge', status: 'published', audience: 'public',
+}));
+
+export function publishedFaqs(entries) {
+  const ids = new Set(), questions = new Set();
+  return entries.filter(entry => {
+    if (!entry || typeof entry !== 'object' || entry.status !== 'published' || entry.audience !== 'public' || entry.kind !== 'knowledge' ||
+      typeof entry.id !== 'string' || !entry.id.trim() || typeof entry.question !== 'string' || !entry.question.trim() ||
+      typeof entry.answer !== 'string' || !entry.answer.trim() || ids.has(entry.id) || questions.has(entry.question.trim())) return false;
+    ids.add(entry.id); questions.add(entry.question.trim()); return true;
+  });
+}
+
+export function sampleFaqs(entries, count = 4, previousIds = [], random = Math.random) {
+  const pool = publishedFaqs(entries);
+  const limit = Math.min(Math.max(0, Math.floor(Number(count) || 0)), pool.length);
+  const previous = new Set(previousIds);
+  const shuffle = items => {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i--) { const j = Math.floor(Math.max(0, Math.min(.999999999, Number(random()) || 0)) * (i + 1)); [copy[i], copy[j]] = [copy[j], copy[i]]; }
+    return copy;
+  };
+  // Prefer entries not shown in the previous batch; never mutate the source bank.
+  return [...shuffle(pool.filter(e => !previous.has(e.id))), ...shuffle(pool.filter(e => previous.has(e.id)))].slice(0, limit);
+}
+
 export const MODE_LABELS = { ai: 'AI 助手接待中', waiting: '等待人工接入', human: '商务接待中', closed: '本次会话已结束' };
 export function visibleOrders(account) { return ORDERS.filter(order => order.companyId === account.companyId); }
 export function isHandoffRequest(text) {
@@ -72,6 +103,17 @@ export class DemoConversationAdapter {
     if (this.state.busy) throw new Error('MESSAGE_IN_FLIGHT');
     if (id !== null && !visibleOrders(this.state.account).some(order => order.id === id)) throw new Error('ORDER_NOT_IN_SCOPE');
     this.state.selectedOrderId = id; this.emit();
+  }
+  answerFaq(id, clientMessageId) {
+    if (this.state.mode !== 'ai') throw new Error('FAQ_REQUIRES_AI_MODE');
+    if (this.state.busy) throw new Error('MESSAGE_IN_FLIGHT');
+    if (this.state.seen.includes(clientMessageId)) return;
+    const faq = publishedFaqs(HOME_FAQS).find(entry => entry.id === id);
+    if (!faq) throw new Error('FAQ_NOT_AVAILABLE');
+    this.state.seen.push(clientMessageId);
+    this.message('customer', faq.question);
+    this.message('assistant', faq.answer, { queriedAt: Date.now(), answer: { kind: 'knowledge', origin: 'faq', text: faq.answer, source: faq.source, sourceId: faq.id } });
+    this.emit();
   }
   async send(text, clientMessageId) {
     if (this.state.mode === 'closed') throw new Error('CONVERSATION_CLOSED');

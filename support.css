@@ -142,3 +142,30 @@
 }
 body.embedded #supportPanel,body.embedded #supportPanel.expanded { inset: 0; width: 100%; height: min(var(--support-vh,100dvh),100dvh); max-height: 100dvh; min-height: 0; transform: none; box-shadow: none; border-radius: 14px; }
 body.embedded #supportPanel #expandChat { display: grid; }
+
+/* Home FAQ: lightweight question rows below the primary composer, not new cards. */
+#supportPanel .home-faqs { flex-shrink: 0; margin: 8px 25px 0; }
+#supportPanel.is-empty .messages { min-height: 106px; }
+#supportPanel .faq-heading { display: flex; justify-content: space-between; align-items: center; min-height: 28px; margin-bottom: 5px; }
+#supportPanel .faq-heading h3 { font-size: .75rem; font-weight: 500; color: #8694a7; }
+#supportPanel .faq-heading .text-button { font-size: .75rem; font-weight: 400; color: #7c92af; padding: 4px 0 4px 12px; }
+#supportPanel .faq-list { display: grid; gap: 0; }
+#supportPanel .faq-item { width: 100%; padding: 8px 0; font-size: .875rem; color: #526983; line-height: 1.6; text-align: left; background: none; border: 0; overflow-wrap: anywhere; }
+#supportPanel .faq-item:hover { color: #2469bb; text-decoration: underline; text-underline-offset: 4px; }
+#supportPanel.expanded .home-faqs { margin-left: 40px; margin-right: 40px; }
+@media(max-width:760px) {
+  #supportPanel .home-faqs,#supportPanel.expanded .home-faqs { margin: 7px 23px 0; }
+  #supportPanel .faq-item { min-height: 38px; padding: 8px 0; font-size: .875rem; }
+}
+@media(max-height:600px) {
+  #supportPanel.is-empty .messages { min-height: 82px; }
+  #supportPanel .home-faqs { margin-top: 2px; }
+  #supportPanel .faq-heading { min-height: 24px; margin-bottom: 0; }
+  #supportPanel .faq-item { min-height: 30px; padding: 4px 0; font-size: .8125rem; }
+}
+@media(max-height:440px) {
+  #supportPanel .home-faqs { display: none; }
+  #supportPanel.is-empty .messages { min-height: 0; }
+  #supportPanel.is-empty .welcome > p { display: none; }
+  #supportPanel.is-empty .empty-space { display: none; }
+}

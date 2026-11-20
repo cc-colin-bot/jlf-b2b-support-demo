@@ -3,7 +3,7 @@ export function mountB2BSupport({ container = document.body, src = new URL('./in
   if (!(container instanceof HTMLElement)) throw new TypeError('A mount container is required.');
   const url = new URL(src, location.href);
   if (!['http:', 'https:'].includes(url.protocol)) throw new TypeError('Widget must be served over HTTP(S).');
-  url.searchParams.set('embed', '1'); url.searchParams.set('parentOrigin', location.origin); url.searchParams.set('v', '0.3.0');
+  url.searchParams.set('embed', '1'); url.searchParams.set('parentOrigin', location.origin); url.searchParams.set('v', '0.4.0');
   const root = document.createElement('div'); root.dataset.jlfSupportWidget = 'demo-v02';
   Object.assign(root.style, { position: 'fixed', right: '16px', bottom: '16px', zIndex: '9999', width: '180px', height: '84px', maxWidth: '100vw' });
   const iframe = document.createElement('iframe'); iframe.title = '联合利丰智能客服（模拟原型）'; iframe.src = url.href;
