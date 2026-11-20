@@ -1,2 +1,15 @@
-# jlf-b2b-support-demo
-Fictional JLF B2B support frontend. Browser-only demo; no real login, ERP, AI, MCP, or WeCom integration.
+# 联合利丰 B2B 智能客服 · 前端交互原型
+
+独立的公开演示站，使用虚构账号、订单和规则模拟回复。
+
+支持订单卡片、知识来源、转人工等待、模拟商务接单与回复、返回 AI、
+结束会话、异常重试，以及演示公司切换。适配桌面与手机。
+
+**未连接真实 B2B 登录、ERP、AI 模型、知识库 MCP、企微通知或真人客服。**
+请勿输入真实客户信息、业务资料、手机号、密码或密钥。
+
+记录只保留在当前页面内存，刷新重置。演示公司筛选不构成真实权限控制。
+
+体验人工流程：点击“转人工”，然后打开“演示控制”模拟接单、人工回复及返回 AI。
+
+静态文件无需构建。可以通过 Python 静态 HTTP 服务预览；请勿直接用 file:// 打开 ES modules。

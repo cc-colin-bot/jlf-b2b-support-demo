@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2774c5">
+  <meta name="description" content="联合利丰 B2B 内置客服前端原型。演示订单查询、知识问答及人工接待，全部为虚构数据，未接入真实 B2B、ERP、MCP 或企微。">
+  <title>联合利丰 B2B · 智能客服体验</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-8H9v8H4a1 1 0 0 1-1-1Z"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 5 9-5M12 12v9M7 5l10 5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 1-8 8H5l-4 3 2-6a8 8 0 1 1 17-5Z"/><path d="M7 10h10M7 14h6"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M8 12h8M8 16h6"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></symbol>
+    <symbol id="i-headset" viewBox="0 0 24 24"><path d="M4 14v-3a8 8 0 0 1 16 0v7a3 3 0 0 1-3 3h-3M4 11H2v7h4v-7H4Zm16 0h2v7h-4v-7h2Z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 5-4 9-8 11-4-2-8-6-8-11V5l8-3Z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 11 18-8-8 18-2-8-8-2Zm8 2L21 3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M4 17h16l-2-3V9A6 6 0 0 0 6 9v5l-2 3Zm6 4h4"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 5h12v12H2V5Zm12 5h4l4 4v3h-8"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5C8 2 4 3 2 4v15c4-1 7-1 10 1 3-2 6-2 10-1V4c-2-1-6-2-10 1Zm0 0v15"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16M8 2v6M16 9v6M10 16v6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></symbol>
+  </defs></svg>
+
+  <header class="platform-header">
+    <a class="brand" href="#" aria-label="联合利丰 B2B 首页"><span class="brand-mark">联</span><span><strong>联合利丰</strong><small>供应链服务平台</small></span><span class="brand-divider"></span><span class="brand-b2b">B2B 客户中心</span></a>
+    <div class="header-actions"><span class="prototype-tag">前端交互原型</span><button class="header-icon" data-action="notice" aria-label="平台通知"><svg class="icon"><use href="#i-bell"/></svg></button><span class="profile-avatar">张</span><span class="profile-name" id="profileName">张经理</span></div>
+  </header>
+  <aside class="platform-nav" aria-label="平台导航">
+    <p class="nav-label">客户工作台</p>
+    <button class="nav-link active" data-view="home"><svg class="icon"><use href="#i-home"/></svg>工作台首页</button>
+    <button class="nav-link" data-view="orders"><svg class="icon"><use href="#i-box"/></svg>我的订单<span id="navOrderCount" class="nav-count">3</span></button>
+    <button class="nav-link" data-action="platform-feature"><svg class="icon"><use href="#i-file"/></svg>报关与单证</button>
+    <button class="nav-link" data-action="platform-feature"><svg class="icon"><use href="#i-truck"/></svg>物流与仓储</button>
+    <button class="nav-link" data-action="platform-feature"><svg class="icon"><use href="#i-user"/></svg>企业信息</button>
+    <div class="nav-bottom"><div class="nav-support"><svg class="icon"><use href="#i-headset"/></svg><strong>服务就在身边</strong><p>查订单、问流程<br>在当前页面轻松沟通</p><button class="text-button" data-action="open-chat">打开智能客服</button></div><span class="nav-footnote">联合利丰 · B2B 服务</span></div>
+  </aside>
+
+  <main class="platform-main" id="platformMain">
+    <div class="breadcrumb">客户中心 <span>/</span> <strong id="breadcrumbTitle">工作台首页</strong></div>
+    <section class="dashboard-heading"><div><p class="eyebrow">CUSTOMER WORKSPACE</p><h1 id="dashboardTitle">上午好，张经理</h1><p class="heading-copy">您的订单与服务进展，一目了然。</p></div><button class="outline-button account-switch" data-action="switch-account"><svg class="icon"><use href="#i-user"/></svg><span id="dashboardCompany">星海电子有限公司</span><svg class="icon small"><use href="#i-down"/></svg></button></section>
+    <div class="demo-disclaimer"><svg class="icon"><use href="#i-info"/></svg><span>当前为独立演示环境，所有账号、订单与对话均为虚构，未连接真实业务系统。</span><button class="text-button" data-action="about">了解原型范围</button></div>
+
+    <section class="stats-grid" id="statsGrid" aria-label="订单概况">
+      <article class="stat-card"><span class="stat-icon blue"><svg class="icon"><use href="#i-box"/></svg></span><span class="stat-label">进行中订单</span><strong id="statActive">2<span>单</span></strong><span class="stat-note">按当前演示账号统计</span></article>
+      <article class="stat-card"><span class="stat-icon orange"><svg class="icon"><use href="#i-clock"/></svg></span><span class="stat-label">待入仓订单</span><strong id="statWaiting">1<span>单</span></strong><span class="stat-note">等待仓库收货</span></article>
+      <article class="stat-card"><span class="stat-icon green"><svg class="icon"><use href="#i-check"/></svg></span><span class="stat-label">已签收订单</span><strong id="statDone">1<span>单</span></strong><span class="stat-note">演示数据，非实时统计</span></article>
+    </section>
+
+    <section class="orders-panel panel"><div class="section-heading"><div><h2 id="ordersTitle">最近订单</h2><p>查看业务节点，随时咨询进展</p></div><label class="order-search"><svg class="icon"><use href="#i-search"/></svg><input id="orderSearch" placeholder="搜索演示订单" aria-label="搜索演示订单" maxlength="80"></label></div><div class="order-table-wrap"><table class="order-table"><thead><tr><th>订单 / 商品</th><th>业务类型</th><th>当前状态</th><th>更新时间</th><th><span class="sr-only">操作</span></th></tr></thead><tbody id="orderRows"></tbody></table></div><div class="table-footer"><span id="orderCount">共 3 笔演示订单</span><span><svg class="icon small"><use href="#i-shield"/></svg> 仅展示当前演示公司的数据</span></div></section>
+
+    <section class="dashboard-bottom" id="dashboardBottom"><article class="panel help-panel"><div class="section-heading"><div><h2>常见问题</h2><p>从平台操作到订单状态</p></div><svg class="icon muted"><use href="#i-book"/></svg></div><button data-question="如何在平台下单？"><span>如何在平台下单？</span><svg class="icon small"><use href="#i-chevron"/></svg></button><button data-question="订单状态有什么含义？"><span>订单状态有什么含义？</span><svg class="icon small"><use href="#i-chevron"/></svg></button><button data-question="查询订单需要哪些信息？"><span>查询订单需要哪些信息？</span><svg class="icon small"><use href="#i-chevron"/></svg></button></article><article class="service-panel"><span class="service-icon"><svg class="icon"><use href="#i-headset"/></svg></span><div><p class="eyebrow">SMART CUSTOMER SERVICE</p><h2>不用找入口，直接问就好</h2><p>订单进度、平台指引，也可以联系人工。<br>聊天始终留在您的 B2B 页面。</p><button class="primary-button" data-action="open-chat">开始咨询</button></div></article></section>
+    <footer class="platform-footer">联合利丰 · 供应链服务平台 <span>B2B 智能客服前端原型 v0.1</span></footer>
+  </main>
+
+  <button id="chatLauncher" class="chat-launcher" aria-label="打开智能客服" aria-controls="supportPanel" aria-expanded="true" hidden><svg class="icon"><use href="#i-headset"/></svg><span>智能客服</span><span id="unreadBadge" class="unread-badge" hidden>0</span></button>
+  <section id="supportPanel" class="support-panel" aria-label="B2B 智能客服">
+    <header class="support-header"><span class="assistant-mark"><svg class="icon"><use href="#i-headset"/></svg></span><div class="support-title"><h2>联合利丰智能客服</h2><p id="modeLabel">AI 助手接待中</p></div><span class="demo-pill">演示</span><button class="icon-button" id="expandChat" aria-label="展开客服窗口" aria-pressed="false"><svg class="icon"><use href="#i-expand"/></svg></button><button class="icon-button" id="minimizeChat" aria-label="收起客服窗口"><svg class="icon"><use href="#i-minus"/></svg></button></header>
+    <div class="scope-bar"><svg class="icon small"><use href="#i-shield"/></svg><span id="chatCompany">星海电子有限公司</span><span class="scope-origin">B2B 演示账号</span></div>
+    <div class="mode-banner" id="modeBanner" hidden><svg class="icon"><use href="#i-clock"/></svg><p id="modeBannerText"></p><button id="cancelWaiting" class="text-button" hidden>返回 AI</button></div>
+    <div class="selected-context" id="selectedContext" hidden><svg class="icon small"><use href="#i-box"/></svg><span id="selectedContextText"></span><button class="icon-button" id="clearContext" aria-label="取消当前订单上下文"><svg class="icon small"><use href="#i-close"/></svg></button></div>
+    <div class="messages" id="messages" role="log" aria-label="客服聊天记录" aria-live="polite" aria-relevant="additions text"></div>
+    <div class="chat-actions"><button class="chat-action" id="handoffButton"><svg class="icon small"><use href="#i-user"/></svg>转人工</button><button class="chat-action" data-question="查询我的最近订单"><svg class="icon small"><use href="#i-box"/></svg>查订单</button><button class="chat-action" data-question="如何在平台下单？"><svg class="icon small"><use href="#i-book"/></svg>平台指引</button><button class="chat-action control-button" data-action="controls"><svg class="icon small"><use href="#i-sliders"/></svg>演示控制</button></div>
+    <form class="composer" id="messageForm"><label class="sr-only" for="messageInput">输入咨询问题</label><textarea id="messageInput" rows="2" maxlength="1000" placeholder="输入问题，例如：我最近的订单到哪了？"></textarea><div class="composer-bottom"><span id="composerHint">Enter 发送 · Shift + Enter 换行</span><button class="send-button" id="sendButton" type="submit" aria-label="发送消息" disabled><svg class="icon"><use href="#i-send"/></svg></button></div></form>
+    <div class="closed-actions" id="closedActions" hidden><p>本次会话已结束，记录保留至切换账号或刷新。</p><button class="primary-button" id="newConversation">发起新会话</button></div>
+    <footer class="support-footer"><span>仅订单查询与知识库问答</span><span>模拟回复 · 不连接真实服务</span></footer>
+  </section>
+
+  <dialog id="demoDialog" class="demo-dialog" aria-labelledby="dialogTitle"><div class="dialog-heading"><div><p class="eyebrow">PROTOTYPE PREVIEW</p><h2 id="dialogTitle">演示控制</h2></div><button class="icon-button" id="closeDialog" aria-label="关闭弹窗"><svg class="icon"><use href="#i-close"/></svg></button></div><div id="dialogContent"></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>
