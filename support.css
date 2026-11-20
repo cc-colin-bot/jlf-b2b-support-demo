@@ -143,7 +143,7 @@
 body.embedded #supportPanel,body.embedded #supportPanel.expanded { inset: 0; width: 100%; height: min(var(--support-vh,100dvh),100dvh); max-height: 100dvh; min-height: 0; transform: none; box-shadow: none; border-radius: 14px; }
 body.embedded #supportPanel #expandChat { display: grid; }
 
-/* Home FAQ: lightweight question rows below the primary composer, not new cards. */
+/* Home FAQ: lightweight question rows; v0.5 places them in the scrollable content. */
 #supportPanel .home-faqs { flex-shrink: 0; margin: 8px 25px 0; }
 #supportPanel.is-empty .messages { min-height: 106px; }
 #supportPanel .faq-heading { display: flex; justify-content: space-between; align-items: center; min-height: 28px; margin-bottom: 5px; }
@@ -168,4 +168,24 @@ body.embedded #supportPanel #expandChat { display: grid; }
   #supportPanel.is-empty .messages { min-height: 0; }
   #supportPanel.is-empty .welcome > p { display: none; }
   #supportPanel.is-empty .empty-space { display: none; }
+}
+
+/* v0.5: the home content gives way to the transcript; the same composer stays put. */
+#supportPanel.is-empty .messages,#supportPanel.expanded.is-empty .messages {
+  display: flex; flex-direction: column; justify-content: flex-start;
+  flex: 1 1 0; min-height: 0; padding: 42px 26px 24px; overflow-y: auto;
+}
+#supportPanel .welcome { flex-shrink: 0; }
+#supportPanel .home-faqs,#supportPanel.expanded .home-faqs { margin: 28px 0 0; }
+.demo-dialog { max-height: min(85dvh,750px); overflow-y: auto; }
+.dialog-faq-list { display: grid; gap: 0; }
+.dialog-faq-item { display: block; width: 100%; text-align: left; padding: 13px 0; border-bottom: 1px solid #edf1f5; color: #4d6d94; font-size: .875rem; line-height: 1.7; overflow-wrap: anywhere; }
+.dialog-faq-item:hover { color: #2469bb; background: #f8fafd; }
+@media(max-width:760px) {
+  #supportPanel.is-empty .messages,#supportPanel.expanded.is-empty .messages { padding: 32px 23px 22px; }
+  #supportPanel .home-faqs,#supportPanel.expanded .home-faqs { margin: 25px 0 0; }
+}
+@media(max-height:600px) {
+  #supportPanel.is-empty .messages,#supportPanel.expanded.is-empty .messages { padding-top: 20px; padding-bottom: 17px; min-height: 0; }
+  #supportPanel .home-faqs { margin-top: 16px; }
 }

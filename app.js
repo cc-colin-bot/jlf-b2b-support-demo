@@ -1,7 +1,8 @@
-import { ACCOUNTS, KNOWLEDGE, HOME_FAQS, publishedFaqs, sampleFaqs, MODE_LABELS, DemoConversationAdapter, visibleOrders } from './domain.js?v=0.4.0';
+import { ACCOUNTS, KNOWLEDGE, HOME_FAQS, publishedFaqs, sampleFaqs, MODE_LABELS, DemoConversationAdapter, visibleOrders } from './domain.js?v=0.5.0';
 
 const $ = id => document.getElementById(id);
 const adapter = new DemoConversationAdapter();
+const homeFaqElement = $('homeFaqs');
 let state, lastState, isOpen = false, unread = 0, dialogKind = null, currentView = 'home', toastTimer;
 let clientSequence = 0, forceScroll = false, newMessageCount = 0, waitTimer;
 let faqBatch = [], faqCount = 0;
@@ -110,7 +111,7 @@ function renderHomeFaqs(reset = false) {
 function chooseFaq(id) {
   if (state.mode !== 'ai' || state.busy) { toast('请先结束当前处理，再选择常见问题。'); return; }
   forceScroll = true;
-  try { adapter.answerFaq(id, `faq-click-${++clientSequence}`); }
+  try { adapter.answerFaq(id, `faq-click-${++clientSequence}`); if (dialogKind === 'faq') $('demoDialog').close(); }
   catch { forceScroll = false; toast('这条问题暂不可用，请重新选择或联系人工。'); }
 }
 function orderResult(order, queriedAt) {
@@ -187,14 +188,17 @@ function renderConversation(next) {
   $('selectedContext').hidden = !state.selectedOrderId;
   $('selectedContextText').textContent = `当前订单：${state.selectedOrderId || ''}`;
   $('composerHint').textContent = state.mode === 'human' ? '消息将进入模拟人工会话' : state.mode === 'waiting' ? '可补充问题，等待模拟商务接入' : 'Enter 发送 · Shift + Enter 换行';
-  $('messageInput').placeholder = state.mode === 'human' ? '向模拟商务发送消息…' : state.mode === 'waiting' ? '补充您希望人工处理的问题…' : '输入订单号，或直接描述您的问题…';
+  $('messageInput').placeholder = state.mode === 'human' ? '向模拟商务发送消息…' : state.mode === 'waiting' ? '补充您希望人工处理的问题…' : state.messages.length === 1 ? '没找到想问的？直接输入问题…' : '输入订单号，或直接描述您的问题…';
   $('messageForm').hidden = state.mode === 'closed'; $('closedActions').hidden = state.mode !== 'closed';
   document.querySelectorAll('.chat-actions [data-question]').forEach(b => b.disabled = state.mode === 'closed' || state.busy);
   const manual = state.mode === 'human' || state.mode === 'waiting';
-  $('knowledgeAction').hidden = manual;
+  const isHome = state.messages.length === 1 && state.mode === 'ai';
+  $('knowledgeAction').hidden = !isHome;
+  $('faqAction').hidden = isHome || manual || state.mode === 'closed';
+  $('faqAction').disabled = state.busy;
   $('ordersAction').querySelector('span').textContent = manual ? '发订单给商务' : '查订单';
   $('ordersAction').disabled = state.mode === 'closed' || state.busy;
-  if (reset) { messages.replaceChildren(); clearNewMessages(); }
+  if (reset) { messages.replaceChildren(homeFaqElement); clearNewMessages(); }
   if (state.messages.length === 1 && state.mode === 'ai' && !messages.querySelector('.welcome')) messages.prepend(renderWelcome());
   if (state.messages.length > 1) messages.querySelector('.welcome')?.remove();
   messages.querySelector('.typing')?.remove();
@@ -288,6 +292,16 @@ function showKnowledge(id) {
   const content = customDialog('回答依据 · 演示知识');
   content.append(el('h3', 'dialog-section-title', `${entry.id} · ${entry.title}`), el('p', 'dialog-copy', entry.answer), el('p', 'dialog-note', '本条为原型自带的示例内容，不是已审核的正式业务制度。尚未调用知识库 MCP；正式接入后需展示真实来源、版本和有效期。'));
 }
+function showFaqPicker() {
+  if (state.mode !== 'ai' || state.busy) return;
+  const content = customDialog('常见问题'); dialogKind = 'faq';
+  content.append(el('p', 'dialog-copy', '选择问题，直接查看对应标准答复；当前输入草稿会保留。'));
+  const list = el('div', 'dialog-faq-list');
+  for (const faq of publishedFaqs(HOME_FAQS)) {
+    const row = button(faq.question, 'dialog-faq-item', () => chooseFaq(faq.id)); row.dataset.faqId = faq.id; list.append(row);
+  }
+  content.append(list);
+}
 function showOrderPicker() {
   if (state.mode === 'ai') { send('查询我的最近订单'); return; }
   if (state.mode === 'closed') return;
@@ -372,6 +386,7 @@ document.addEventListener('click', event => {
     case 'switch-account': openDialog('account'); break;
     case 'about': openDialog('about'); break;
     case 'orders-action': showOrderPicker(); break;
+    case 'faqs': showFaqPicker(); break;
     case 'notice': toast('此为界面原型，未接入真实系统通知。'); break;
     case 'platform-feature': toast('该入口属于原 B2B 平台功能，本次原型不实现业务操作。'); break;
   }

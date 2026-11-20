@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>B2B 客服隔离嵌入示例</title><style>
 body{font-family:system-ui,"Microsoft YaHei",sans-serif;padding:32px;line-height:1.8;color:#263b52;background:#f5f8fc}main{max-width:740px;margin:40px auto}h1{font-size:26px}button{font:inherit;border:1px solid #c8d9ec;padding:10px 16px;border-radius:8px;background:#fff;color:#286bb4;cursor:pointer;margin:5px}p{color:#61758e}code{background:#e8eff8;padding:3px 7px}small{display:block;color:#8b9aab}
 </style></head><body><main><h1>客服组件隔离嵌入示例</h1><p>这里是一个独立宿主页面。右下角客服运行在 iframe 中，不加载客服的全局样式到宿主，不接管宿主按钮事件。</p><p>这是纯模拟前端组件，尚未接入 B2B 登录、会话服务、ERP、知识库或企微。请勿输入真实资料。</p><button id="mount">挂载客服</button><button id="open">打开客服</button><button id="minimize">收起客服</button><button id="destroy">销毁组件</button><p id="embedStatus" role="status">组件已挂载</p><small>演示用途：验证挂载／销毁、样式隔离、窗口尺寸及来源校验。iframe 不是身份认证或权限控制方案。</small></main><script type="module">
-import { mountB2BSupport } from './support-widget.js?v=0.4.0';
+import { mountB2BSupport } from './support-widget.js?v=0.5.0';
 let widget;
 function mount() { if (widget) return; widget = mountB2BSupport({ onStateChange: s => document.getElementById('embedStatus').textContent = s.open ? '客服窗口已打开' : '客服窗口已收起' }); document.getElementById('embedStatus').textContent = '组件已挂载'; }
 document.getElementById('mount').onclick = mount;
